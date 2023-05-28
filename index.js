@@ -29,13 +29,15 @@ async function run() {
 
 
     //assignments
-
+    // To get the all the events
     app.get("/", async (req, res) => {
         
         const query = {};
         const event = await infos.find(query).toArray();
         res.send(event);
     });
+
+    // 1 
 
     app.get("/api/v3/app/events", async (req, res) => {
       if (req?.query?.type) {
@@ -59,6 +61,8 @@ async function run() {
         res.send(event);
       }
     });
+
+    // 2
     app.post("/api/v3/app/events", async (req, res) => {
       const info = req.body;
       console.log(info);
@@ -67,36 +71,29 @@ async function run() {
       res.send(result.insertedId);
     });
 
-    app.put('/api/v3/app/events/:id', async (req, res) => {
-      const id = req.params.id;
+    // 3
 
-
-      const {type,uid,name,tagline,schedule,description,image,moderator,category,sub_category,rigor_rank,attendees} = req.body;
-      const filter = { _id: new ObjectId(id) }
-      const options = { upsert: true };
-      const updatedDoc = {
-          $set: {
-             
-              type,
-              uid,
-              name,
-              tagline,
-              schedule,
-              description,
-              files: {
-                image
-              },
-              moderator,
-              category,
-              sub_category,
-              rigor_rank,
-              attendees
-          }
+  
+  app.put('/api/v3/app/events/:id', async (req, res) => {
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id) };
+    const options = { upsert: true };
+    const updatedDoc = { $set: {} };
+  
+    for (const key in req.body) {
+      if (req.body.hasOwnProperty(key)) {
+        const value = req.body[key];
+        if (value) {
+          updatedDoc.$set[key] = value;
+        }
       }
-      const result = await infos.updateOne(filter, updatedDoc, options);
-      res.send(result);
+    }
+  
+    const result = await infos.updateOne(filter, updatedDoc, options);
+    res.send(result);
   });
-
+  
+// 4
   app.delete("/api/v3/app/events/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
